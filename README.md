@@ -1,70 +1,108 @@
-# Getting Started with Create React App
+# Therma-Snaps
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+*Warm Memories on Receipts*
 
-## Available Scripts
+Therma-Snaps is a web-based photobooth application that captures moments and prints them instantly on a thermal receipt printer. Built with React, it leverages the Web Bluetooth API for hardware communication and Supabase for cloud storage, providing both a physical keepsake and a digital backup of your memories.
 
-In the project directory, you can run:
+## Features
 
-### `npm start`
+*   **Webcam Capture**: Take single or multi-shot photos directly from your browser.
+*   **Thermal Printing**: Connect to a compatible thermal printer via Web Bluetooth and print your photo strips.
+*   **Custom Layouts**: Choose between different photo strip layouts.
+*   **Digital Copies**: Photos are automatically uploaded to a Supabase backend.
+*   **QR Code Downloads**: A unique QR code is generated for each session, allowing users to download a digital copy of their photo strip (valid for 3 days).
+*   **Admin Panel**: A simple login for the event operator.
+*   **Responsive Design**: Optimized for a tablet or kiosk setup.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## Gallery
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+| Home Screen | Layout Selection |
+|:---:|:---:|
+| ![Home Screen](screenshots/1.png) | ![Layout Selection](screenshots/3.png) |
+| **Camera Capture** | **Print Preview** |
+| ![Admind Panel](screenshots/2.png) | ![Print Preview](screenshots/4.png) |
 
-### `npm test`
+## Tech Stack
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+*   **Frontend**: React.js
+*   **Backend & Storage**: Supabase
+*   **Hardware Integration**: Web Bluetooth API
+*   **Styling**: Inline CSS & CSS-in-JS
 
-### `npm run build`
+## Getting Started
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+Follow these instructions to get a local copy up and running.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### Prerequisites
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+*   Node.js and npm
+*   A Supabase account
+*   A compatible thermal printer (tested with MP-58A1)
 
-### `npm run eject`
+### Installation & Setup
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com/acousticsometimes/therma-snaps-photobooth.git
+    cd therma-snaps-photobooth
+    ```
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+2.  **Install dependencies:**
+    ```bash
+    npm install
+    ```
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+3.  **Set up environment variables:**
+    Create a `.env` file in the root of the project and add your Supabase credentials. You can get these from your Supabase project's API settings.
+    ```env
+    REACT_APP_SUPABASE_URL=YOUR_SUPABASE_URL
+    REACT_APP_SUPABASE_ANON_KEY=YOUR_SUPABASE_ANON_KEY
+    ```
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+4.  **Set up Supabase:**
+    You will need to create a storage bucket named `photos` and a table named `photo_metadata`. You can use the following SQL in the Supabase SQL Editor:
+    ```sql
+    -- Create the storage bucket for photos
+    INSERT INTO storage.buckets (id, name, public)
+    VALUES ('photos', 'photos', true)
+    ON CONFLICT (id) DO UPDATE SET public = true;
 
-## Learn More
+    -- Create a policy to allow public read access to the photos
+    CREATE POLICY "Public Read Access" ON storage.objects
+    FOR SELECT USING (bucket_id = 'photos');
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+    -- Create the table to store photo metadata
+    CREATE TABLE public.photo_metadata (
+      key TEXT PRIMARY KEY,
+      value JSONB,
+      created_at TIMESTAMPTZ DEFAULT now()
+    );
+    ```
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+5.  **Run the application:**
+    ```bash
+    npm start
+    ```
+    The app will be available at `http://localhost:3000`.
 
-### Code Splitting
+## Admin Demo
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+To try out the admin interface, use the following credentials on the login screen:
+*   **Username**: `admin123`
+*   **Password**: `040404`
 
-### Analyzing the Bundle Size
+## Hardware
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+This application is designed to work with thermal receipt printers that support the Web Bluetooth API. The development and testing were done using an **MP-58A1** model. Your mileage may vary with other printers, and you might need to adjust the Bluetooth service and characteristic UUIDs in `src/App.js`.
 
-### Making a Progressive Web App
+## Deployment
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+This app can be deployed to any static site hosting service like Vercel, Netlify, or GitHub Pages.
 
-### Advanced Configuration
+1.  Run `npm run build` to create a production build in the `build/` directory.
+2.  Deploy the `build/` folder to your hosting provider.
+3.  Remember to configure the environment variables (`REACT_APP_SUPABASE_URL` and `REACT_APP_SUPABASE_ANON_KEY`) in your hosting provider's settings.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+## License
 
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+This project is licensed under the MIT License. See the LICENSE file for details.
